@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belajar Bersama Kaza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FFF0F5; /* Lavender blush background */
+            color: #333333;
+        }
+        .text-pink-500 { color: #FF69B4; } /* Hot pink accent */
+        .bg-pink-300 { background-color: #FFC0CB; } /* Light pink background for elements */
+        .border-pink-500 { border-color: #FF69B4; }
+
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFC0CB;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF69B4;
+        }
+
+        /* Responsive utilities for page content */
+        .main-content-area {
+            max-height: calc(100vh - 80px); /* Adjust based on header height */
+            overflow-y: auto;
+        }
+
+        /* Simple animation for the cow */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-subtle {
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        /* Styling for the custom message box */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+        }
+        .message-box.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Loading Screen (Optional, can be hidden quickly) -->
+    <div id="loading-screen" class="fixed inset-0 bg-pink-300 flex items-center justify-center z-50 transition-opacity duration-500">
+        <div class="text-white text-3xl font-bold flex items-center space-x-3">
+            <span class="animate-spin h-8 w-8 border-4 border-white rounded-full border-t-transparent"></span>
+            <span>Memuat Belajar Bersama Kaza...</span>
+        </div>
+    </div>
+
+    <!-- Intro Message Screen -->
+    <div id="intro-message-screen" class="fixed inset-0 bg-pink-500 flex items-center justify-center z-40 transition-opacity duration-700 opacity-100">
+        <div class="text-white text-center p-8 max-w-lg rounded-xl shadow-lg">
+            <h2 class="text-4xl font-bold mb-4">Selamat datang Shafira!</h2>
+            <p class="text-xl leading-relaxed">
+                Ini salah satu hadiah dari Kaza yang belum sempat Kaza kasih. Semoga sapi suka dan akan terbantu dengan website ini.
+            </p>
+            <p class="text-sm mt-6 opacity-80">Klik di mana saja untuk melanjutkan...</p>
+        </div>
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="custom-message-box" class="message-box">
+        <p id="message-text" class="text-lg text-center mb-4"></p>
+        <button id="message-ok-button" class="w-full bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 transition-colors">Oke</button>
+    </div>
+
+    <!-- Auth Page (Login/Register) -->
+    <div id="auth-page" class="hidden w-full max-w-md bg-white p-8 rounded-xl shadow-lg transition-transform transform duration-300 scale-95 opacity-0">
+        <h1 class="text-4xl font-bold text-center text-pink-500 mb-8">SELAMAT DATANG DI WEBSITE BELAJAR BERSAMA KAZA, CANTIK</h1>
+        <div class="space-y-6">
+            <div>
+                <label for="nickname" class="block text-gray-700 text-sm font-bold mb-2">Nama Panggilan:</label>
+                <input type="text" id="nickname" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-300" placeholder="Shafira">
+            </div>
+            <div>
+                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Kata Sandi:</label>
+                <input type="password" id="password" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-300" placeholder="cantik">
+            </div>
+            <button id="login-button" class="w-full bg-pink-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-600 transition-colors duration-200 shadow-md">Masuk</button>
+            <p class="text-center text-gray-600 text-sm mt-4">Belum punya akun? Registrasi di sini.</p>
+            <button id="register-button" class="w-full bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-400 transition-colors duration-200 shadow-md">Registrasi</button>
+        </div>
+    </div>
+
+    <!-- Main App Page -->
+    <div id="main-app-page" class="hidden w-full max-w-5xl h-[calc(100vh-2rem)] bg-white p-4 sm:p-8 rounded-xl shadow-lg flex flex-col md:flex-row transition-transform transform duration-300 scale-95 opacity-0">
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-1/4 bg-pink-300 p-4 rounded-lg md:mr-4 mb-4 md:mb-0 flex flex-col overflow-hidden">
+            <h2 class="text-2xl font-bold text-pink-500 mb-4 text-center md:text-left">Modul TBI</h2>
+            <nav class="flex-grow overflow-y-auto pr-2">
+                <ul class="space-y-3">
+                    <li><button data-module="tenses" class="module-button w-full text-left py-2 px-3 rounded-md bg-white text-gray-800 hover:bg-pink-100 transition-colors duration-200 shadow-sm">Tenses</button></li>
+                    <li><button data-module="subject-verb-agreement" class="module-button w-full text-left py-2 px-3 rounded-md bg-white text-gray-800 hover:bg-pink-100 transition-colors duration-200 shadow-sm">Subject-Verb Agreement</button></li>
+                    <li><button data-module="reading-comprehension" class="module-button w-full text-left py-2 px-3 rounded-md bg-white text-gray-800 hover:bg-pink-100 transition-colors duration-200 shadow-sm">Reading Comprehension</button></li>
+                    <li><button data-module="vocabulary" class="module-button w-full text-left py-2 px-3 rounded-md bg-white text-gray-800 hover:bg-pink-100 transition-colors duration-200 shadow-sm">Vocabulary</button></li>
+                    <li><button data-module="about-us" class="module-button w-full text-left py-2 px-3 rounded-md bg-white text-gray-800 hover:bg-pink-100 transition-colors duration-200 shadow-sm">Tentang Kami</button></li>
+                    <li><button data-module="contact" class="module-button w-full text-left py-2 px-3 rounded-md bg-white text-gray-800 hover:bg-pink-100 transition-colors duration-200 shadow-sm">Kontak</button></li>
+                </ul>
+            </nav>
+            <!-- Progress Tracker -->
+            <div class="mt-6 p-3 bg-white rounded-lg shadow-inner">
+                <h3 class="text-md font-semibold text-gray-700 mb-2">Progres Belajar</h3>
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div id="progress-bar" class="bg-pink-500 h-4 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                </div>
+                <p id="progress-text" class="text-sm text-gray-600 mt-2 text-right">0% Selesai</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow bg-white p-4 sm:p-6 rounded-lg shadow-inner main-content-area relative">
+            <!-- Header for Main App Page -->
+            <header class="flex flex-col sm:flex-row items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                <h1 class="text-3xl font-bold text-pink-500 mb-2 sm:mb-0">Belajar Bersama Kaza!</h1>
+                <div class="text-gray-700 text-lg">Halo, <span id="display-nickname" class="font-semibold text-pink-500">Pengguna</span>!</div>
+            </header>
+
+            <!-- Content Area for Modules -->
+            <div id="module-content">
+                <!-- Default Home Content -->
+                <section id="home-section" class="module-section active">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Selamat Belajar!</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        Halo, selamat datang di "Belajar Bersama Kaza"! Siap-siap untuk petualangan belajar yang seru dan interaktif.
+                        Di sini kamu akan menemukan materi TBI (Tes Bahasa Inggris) yang lengkap untuk persiapan tes kedinasan STAN,
+                        disajikan dengan cara yang mudah dimengerti dan tidak membosankan.
+                    </p>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        Mari kita mulai dengan memilih modul di sebelah kiri. Karakter sapi lucu kita akan menemanimu di setiap langkah!
+                    </p>
+                    <button class="bg-pink-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-600 transition-colors duration-200 shadow-md" onclick="showMessage('Yuk, pilih modul Tenses di sidebar kiri untuk memulai perjalanan belajarmu yang cantik!', 'sapi');">Mulai Belajar!</button>
+                </section>
+
+                <!-- Tenses Module -->
+                <section id="tenses-module" class="module-section hidden">
+                    <h2 class="text-3xl font-bold text-pink-500 mb-4">Modul Tenses</h2>
+                    <p class="text-gray-700 mb-4">
+                        <span class="font-semibold text-pink-500">Sapi Kaza:</span> Hai! Tenses itu penting banget lho buat paham kapan suatu kejadian terjadi. Yuk, kita pelajari bareng!
+                    </p>
+                    <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">1. Simple Present Tense</h3>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        Digunakan untuk menyatakan kebiasaan, fakta umum, atau jadwal tetap.
+                        <br><span class="font-bold">Rumus:</span> Subject + Verb 1 (s/es)
+                        <br><span class="font-bold">Contoh:</span> <em class="text-pink-500">She <span class="font-bold">studies</span> English every day.</em> (Dia belajar Bahasa Inggris setiap hari.)
+                    </p>
+                    <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">2. Simple Past Tense</h3>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        Digunakan untuk menyatakan kejadian yang sudah selesai di masa lalu.
+                        <br><span class="font-bold">Rumus:</span> Subject + Verb 2
+                        <br><span class="font-bold">Contoh:</span> <em class="text-pink-500">They <span class="font-bold">visited</span> the museum yesterday.</em> (Mereka mengunjungi museum kemarin.)
+                    </p>
+                    <button class="bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 mt-4" onclick="showMessage('Hebat! Kamu sudah menyelesaikan materi Tenses. Sekarang coba kuisnya yuk, untuk menguji pemahamanmu yang cantik!', 'sapi'); updateProgress('tenses');">Selesai Modul Tenses</button>
+                    <!-- Placeholder for quiz -->
+                    <div class="bg-pink-100 p-4 rounded-lg mt-6 border border-pink-300">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-3">Kuis Tenses Interaktif (Placeholder)</h4>
+                        <p class="text-gray-700 mb-2">Pilih kalimat yang benar:</p>
+                        <div class="space-y-2">
+                            <label class="block">
+                                <input type="radio" name="tense-quiz" value="a" class="mr-2"> She go to school every day.
+                            </label>
+                            <label class="block">
+                                <input type="radio" name="tense-quiz" value="b" class="mr-2"> She goes to school every day.
+                            </label>
+                            <label class="block">
+                                <input type="radio" name="tense-quiz" value="c" class="mr-2"> She went to school every day.
+                            </label>
+                        </div>
+                        <button class="bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 mt-4" onclick="showMessage('Ini adalah placeholder kuis. Nanti akan ada mekanisme cek jawaban yang sesungguhnya! Terus semangat ya!', 'info');">Cek Jawaban</button>
+                        <!-- Mini-game Placeholder -->
+                        <div class="bg-white p-4 rounded-lg mt-6 border border-gray-200">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Mini-Game: Susun Kalimat (Placeholder)</h4>
+                            <p class="text-gray-700 mb-2">Tugas: Susun kata-kata berikut menjadi kalimat yang benar!</p>
+                            <p class="font-mono bg-gray-100 p-2 rounded">every / reads / book / she / a / day</p>
+                            <input type="text" placeholder="Tulis jawabanmu di sini..." class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-300 mt-2">
+                            <button class="bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 mt-4" onclick="showMessage('Ini adalah placeholder mini-game. Nanti akan ada fitur drag-and-drop atau input validasi yang sesungguhnya! Kamu pasti bisa!', 'info');">Cek Jawaban</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Subject-Verb Agreement Module -->
+                <section id="subject-verb-agreement-module" class="module-section hidden">
+                    <h2 class="text-3xl font-bold text-pink-500 mb-4">Modul Subject-Verb Agreement</h2>
+                    <p class="text-gray-700 mb-4">
+                        <span class="font-semibold text-pink-500">Sapi Kaza:</span> Ini aturan dasar yang harus kamu kuasai. Subjek dan kata kerja harus "sepakat" ya!
+                    </p>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        Aturan paling dasar adalah subjek tunggal menggunakan kata kerja tunggal (dengan -s/-es untuk Simple Present Tense), dan subjek jamak menggunakan kata kerja jamak.
+                        <br><span class="font-bold">Contoh:</span>
+                        <br><em class="text-pink-500">He <span class="font-bold">walks</span>.</em> (Subjek tunggal, kata kerja tunggal)
+                        <br><em class="text-pink-500">They <span class="font-bold">walk</span>.</em> (Subjek jamak, kata kerja jamak)
+                    </p>
+                    <button class="bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 mt-4" onclick="showMessage('Fantastis! Materi Subject-Verb Agreement sudah selesai. Jangan lupa latihan kuisnya untuk mengasah kemampuanmu yang cantik!', 'sapi'); updateProgress('subject-verb-agreement');">Selesai Modul SVA</button>
+                    <!-- Placeholder for quiz/mini-game -->
+                    <div class="bg-pink-100 p-4 rounded-lg mt-6 border border-pink-300">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-3">Kuis SVA (Placeholder)</h4>
+                        <p class="text-gray-700">Akan ada kuis dan mini-game seru di sini!</p>
+                    </div>
+                </section>
+
+                <!-- Reading Comprehension Module -->
+                <section id="reading-comprehension-module" class="module-section hidden">
+                    <h2 class="text-3xl font-bold text-pink-500 mb-4">Modul Reading Comprehension</h2>
+                    <p class="text-gray-700 mb-4">
+                        <span class="font-semibold text-pink-500">Sapi Kaza:</span> Membaca itu bukan cuma baca, tapi juga paham isinya. Yuk, asah kemampuan membaca cepatmu! Kamu pasti bisa menemukan inti dari setiap teks.
+                    </p>
+                    <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">Teks Contoh: Dampak Media Sosial pada Remaja</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4 leading-relaxed">
+                        <p class="mb-2">Social media platforms have become an integral part of teenagers' lives globally. While they offer numerous benefits such as connecting with friends and family, and accessing information, their impact on mental health and academic performance is a growing concern. Studies show that excessive use can lead to anxiety, depression, and cyberbullying. Moreover, the constant flow of information and notifications can distract students from their studies, affecting their concentration and grades. It is crucial for teenagers to practice digital well-being and for parents to monitor their online activities.</p>
+                        <p class="mb-2">However, social media also provides platforms for creative expression, learning new skills, and even participating in social activism. Many educational content creators use platforms like YouTube and TikTok to share knowledge in engaging ways, making learning more accessible. The key lies in moderation and conscious use. Teenagers should be encouraged to use social media as a tool for positive engagement rather than a source of comparison or distraction. Balancing online and offline activities is essential for their overall development.</p>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3">Pertanyaan (Pilih Jawaban yang Paling Tepat):</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="font-semibold mb-1">1. Apa ide pokok dari paragraf pertama?</p>
+                            <label class="block"><input type="radio" name="rc-q1" value="a" class="mr-2"> Manfaat media sosial untuk remaja.</label>
+                            <label class="block"><input type="radio" name="rc-q1" value="b" class="mr-2"> Kekhawatiran tentang dampak media sosial pada kesehatan mental dan akademik.</label>
+                            <label class="block"><input type="radio" name="rc-q1" value="c" class="mr-2"> Remaja harus berhenti menggunakan media sosial.</label>
+                        </div>
+                        <div>
+                            <p class="font-semibold mb-1">2. Menurut teks, apa salah satu manfaat positif media sosial?</p>
+                            <label class="block"><input type="radio" name="rc-q2" value="a" class="mr-2"> Meningkatkan nilai akademik.</label>
+                            <label class="block"><input type="radio" name="rc-q2" value="b" class="mr-2"> Menyebabkan kecemasan dan depresi.</label>
+                            <label class="block"><input type="radio" name="rc-q2" value="c" class="mr-2"> Platform untuk ekspresi kreatif dan pembelajaran.</label>
+                        </div>
+                    </div>
+                    <button class="bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 mt-4" onclick="showMessage('Kerja bagus, cantik! Modul Reading Comprehension sudah selesai. Kamu selangkah lebih dekat menuju impianmu!', 'sapi'); updateProgress('reading-comprehension');">Selesai Modul Reading</button>
+                </section>
+
+                <!-- Vocabulary Module -->
+                <section id="vocabulary-module" class="module-section hidden">
+                    <h2 class="text-3xl font-bold text-pink-500 mb-4">Modul Vocabulary</h2>
+                    <p class="text-gray-700 mb-4">
+                        <span class="font-semibold text-pink-500">Sapi Kaza:</span> Perbendaharaan kata yang banyak itu bikin kamu makin jago Bahasa Inggris! Yuk, kembangkan terus kosakatamu yang cantik!
+                    </p>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        Akan ada daftar kata-kata penting yang sering muncul di tes STAN, beserta artinya dan contoh penggunaannya dalam kalimat.
+                    </p>
+                    <button class="bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 mt-4" onclick="showMessage('Hebat, cantik! Modul Vocabulary sudah kamu simak. Terus semangat ya, penguasaan kata adalah kekuatan! Terima kasih sudah belajar keras!', 'sapi'); updateProgress('vocabulary');">Selesai Modul Vocabulary</button>
+                    <!-- Placeholder for quiz/mini-game -->
+                    <div class="bg-pink-100 p-4 rounded-lg mt-6 border border-pink-300">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-3">Mini-Game Teka-Teki Kata (Placeholder)</h4>
+                        <p class="text-gray-700">Temukan arti kata yang tersembunyi di sini!</p>
+                    </div>
+                </section>
+
+                <!-- About Us Page -->
+                <section id="about-us-module" class="module-section hidden">
+                    <h2 class="text-3xl font-bold text-pink-500 mb-4">Tentang Kami</h2>
+                    <p class="text-gray-700 leading-relaxed">
+                        Selamat datang di Belajar Bersama Kaza! Kami hadir untuk membantu para remaja setingkat SMA, khususnya yang ingin mempersiapkan diri untuk tes kedinasan STAN. Kami memahami bahwa belajar bisa jadi tantangan, terutama bagi pemula,
+                        maka dari itu kami berkomitmen untuk menyajikan materi TPA dan TBI dengan cara yang paling menyenangkan, interaktif, dan mudah dimengerti.
+                    </p>
+                    <p class="text-gray-700 leading-relaxed mt-4">
+                        Dengan panduan dari karakter sapi lucu kami, kuis interaktif, mini-game edukatif, dan pelacak progres, kami berharap pengalaman belajarmu di sini akan efektif sekaligus seru! Mari wujudkan mimpimu bersama Kaza.
+                    </p>
+                </section>
+
+                <!-- Contact Page -->
+                <section id="contact-module" class="module-section hidden">
+                    <h2 class="text-3xl font-bold text-pink-500 mb-4">Kontak Kami</h2>
+                    <p class="text-gray-700 leading-relaxed">
+                        Ada pertanyaan atau butuh bantuan? Jangan ragu untuk menghubungi kami!
+                    </p>
+                    <p class="text-gray-700 font-bold text-lg mt-4">
+                        Telepon/WhatsApp: <a href="tel:+6287867009995" class="text-pink-500 hover:underline">087867009995</a>
+                    </p>
+                    <p class="text-gray-700 mt-2">
+                        Kami siap membantu dan mendengarkan masukanmu untuk membuat Belajar Bersama Kaza semakin baik! Terima kasih atas dukunganmu!
+                    </p>
+                </section>
+            </div>
+
+            <!-- Sapi Kaza Character -->
+            <div id="kaza-cow" class="absolute bottom-4 right-4 cursor-pointer animate-bounce-subtle hover:scale-105 transition-transform duration-200" onclick="showMessage(getRandomCowMessage(), 'sapi');">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Body (Pinkish-White) -->
+                    <ellipse cx="12" cy="16" rx="9" ry="6" fill="#FFC0CB"/>
+                    <!-- Head -->
+                    <circle cx="12" cy="8" r="5" fill="#FFC0CB"/>
+                    <!-- Snout -->
+                    <path d="M12 11C10.5 11 9.5 10 9.5 9C9.5 8 10.5 7 12 7C13.5 7 14.5 8 14.5 9C14.5 10 13.5 11 12 11Z" fill="#F0F8FF"/>
+                    <!-- Nostrils -->
+                    <circle cx="11" cy="9.5" r="0.7" fill="#884A5C"/>
+                    <circle cx="13" cy="9.5" r="0.7" fill="#884A5C"/>
+                    <!-- Eyes -->
+                    <circle cx="10" cy="7" r="1" fill="#000000"/>
+                    <circle cx="14" cy="7" r="1" fill="#000000"/>
+                    <!-- Ears -->
+                    <path d="M7.5 5.5 C6.5 4 6 5.5 6.5 7 C7 8.5 8.5 7 7.5 5.5Z" fill="#FFC0CB" stroke="#FF69B4" stroke-width="0.5"/>
+                    <path d="M16.5 5.5 C17.5 4 18 5.5 17.5 7 C17 8.5 15.5 7 16.5 5.5Z" fill="#FFC0CB" stroke="#FF69B4" stroke-width="0.5"/>
+                    <!-- Horns -->
+                    <path d="M8.5 4.5 L8 3 L9.5 3.5 Z" fill="#8B4513"/>
+                    <path d="M15.5 4.5 L16 3 L14.5 3.5 Z" fill="#8B4513"/>
+                    <!-- Tail -->
+                    <path d="M18 18 C19 17 20 19 19.5 20 C19 21 17 20 18 18Z" fill="#8B4513"/>
+                    <path d="M19.5 20 C20 21 21 20 21 20 C21 20 21 22 20 22 C19 22 19.5 20 19.5 20Z" fill="#8B4513"/>
+                </svg>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Global State Variables ---
+        let currentUserId = null;
+        let isAuthenticated = false;
+        let completedModules = {}; // Track completed modules: { 'module-name': true, ... }
+        const totalModules = 4; // Tenses, SVA, Reading, Vocabulary (for progress calculation)
+        let currentUserNickname = '';
+
+        // --- DOM Elements ---
+        const loadingScreen = document.getElementById('loading-screen');
+        const introMessageScreen = document.getElementById('intro-message-screen');
+        const authPage = document.getElementById('auth-page');
+        const mainAppPage = document.getElementById('main-app-page');
+        const nicknameInput = document.getElementById('nickname');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login-button');
+        const registerButton = document.getElementById('register-button');
+        const displayNickname = document.getElementById('display-nickname');
+        const moduleButtons = document.querySelectorAll('.module-button');
+        const moduleContent = document.getElementById('module-content');
+        const homeSection = document.getElementById('home-section');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const customMessageBox = document.getElementById('custom-message-box');
+        const messageText = document.getElementById('message-text');
+        const messageOkButton = document.getElementById('message-ok-button');
+        const kazaCow = document.getElementById('kaza-cow');
+
+        // --- Motivational Messages Array ---
+        const cowMessages = [
+            'Moo! Selamat belajar ya, kawan! Jangan menyerah!',
+            'Semangat! Setiap langkah kecil membawamu lebih dekat ke tujuan, cantik!',
+            'Kamu hebat! Teruslah belajar, aku yakin kamu pasti bisa!',
+            'Jangan takut salah, itu bagian dari proses belajar. Ayo coba lagi, cantik!',
+            'Tetap fokus ya! Impianmu sudah menunggu di depan!',
+            'Mooooo-tivasi selalu bersamamu!',
+            'Ingat, usaha tidak akan mengkhianati hasil. Terima kasih sudah berjuang!',
+            'Ambil napas dalam-dalam, kamu pasti bisa menaklukkan modul ini, cantik!'
+        ];
+
+        function getRandomCowMessage() {
+            const randomIndex = Math.floor(Math.random() * cowMessages.length);
+            return cowMessages[randomIndex];
+        }
+
+        // --- Message Box Functionality ---
+        function showMessage(message, speaker = 'info') {
+            messageText.innerHTML = speaker === 'sapi' ? `<span class="font-semibold text-pink-500">Sapi Kaza:</span> ${message}` : message;
+            customMessageBox.classList.add('active');
+            // Stop cow animation if it's currently bouncing, and re-enable on close if speaker is sapi
+            if (speaker === 'sapi') {
+                kazaCow.classList.remove('animate-bounce-subtle');
+            }
+        }
+
+        function hideMessage() {
+            customMessageBox.classList.remove('active');
+            // Re-enable cow animation if it was paused
+            if (!kazaCow.classList.contains('animate-bounce-subtle')) {
+                kazaCow.classList.add('animate-bounce-subtle');
+            }
+        }
+        messageOkButton.addEventListener('click', hideMessage);
+
+        // --- Page Navigation ---
+        function showPage(pageId) {
+            // Hide all main sections first for proper transition
+            introMessageScreen.classList.add('hidden', 'opacity-0');
+            authPage.classList.add('hidden', 'opacity-0', 'scale-95');
+            mainAppPage.classList.add('hidden', 'opacity-0', 'scale-95');
+
+            // Show the requested page with animation
+            setTimeout(() => { // Small delay for transition effect
+                if (pageId === 'intro') {
+                    introMessageScreen.classList.remove('hidden', 'opacity-0');
+                    introMessageScreen.classList.add('opacity-100');
+                } else if (pageId === 'auth') {
+                    authPage.classList.remove('hidden', 'opacity-0', 'scale-95');
+                    authPage.classList.add('scale-100', 'opacity-100');
+                } else if (pageId === 'main') {
+                    mainAppPage.classList.remove('hidden', 'opacity-0', 'scale-95');
+                    mainAppPage.classList.add('scale-100', 'opacity-100');
+                }
+            }, 100);
+        }
+
+        // --- Authentication (Conceptual) ---
+        function handleLogin() {
+            const nickname = nicknameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (nickname === 'Shafira' && password === 'cantik') {
+                isAuthenticated = true;
+                currentUserNickname = nickname;
+                displayNickname.textContent = nickname; // Update display nickname
+                showPage('main');
+                showMessage('Berhasil masuk! Selamat datang kembali, ' + nickname + ' yang cantik! Ayo, wujudkan mimpimu bersama Kaza!', 'info');
+            } else {
+                showMessage('Nama panggilan atau kata sandi salah. Coba lagi ya!', 'info');
+            }
+        }
+
+        function handleRegister() {
+            const nickname = nicknameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (nickname && password) {
+                // In a real app, this would save to a database (e.g., Firestore)
+                // For this demo, we'll just "register" them and then auto-login
+                isAuthenticated = true;
+                currentUserNickname = nickname;
+                displayNickname.textContent = nickname; // Update display nickname
+                showPage('main');
+                showMessage('Registrasi berhasil! Selamat datang, ' + nickname + ' yang cantik! Mari kita mulai petualangan belajar yang menyenangkan! Terima kasih sudah bergabung!', 'info');
+            } else {
+                showMessage('Nama panggilan dan kata sandi tidak boleh kosong.', 'info');
+            }
+        }
+
+        loginButton.addEventListener('click', handleLogin);
+        registerButton.addEventListener('click', handleRegister);
+
+        // --- Module Content Display ---
+        function displayModule(moduleId) {
+            // Hide all module sections first
+            document.querySelectorAll('.module-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            // Deactivate all module buttons
+            document.querySelectorAll('.module-button').forEach(button => {
+                button.classList.remove('bg-pink-500', 'text-white');
+                button.classList.add('bg-white', 'text-gray-800');
+            });
+
+            // Show the selected module
+            const targetSection = document.getElementById(moduleId + '-module');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            } else if (moduleId === 'home') { // Fallback to home if module doesn't exist
+                homeSection.classList.remove('hidden');
+            }
+
+            // Activate the corresponding button
+            const activeModuleButton = document.querySelector(`[data-module="${moduleId}"]`);
+            if (activeModuleButton) {
+                activeModuleButton.classList.remove('bg-white', 'text-gray-800');
+                activeModuleButton.classList.add('bg-pink-500', 'text-white');
+            }
+        }
+
+        // Event listeners for module buttons
+        moduleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const moduleId = button.dataset.module;
+                displayModule(moduleId);
+                // Scroll to top of content area when new module is loaded
+                moduleContent.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // --- Progress Tracker ---
+        function updateProgress(moduleId) {
+            if (!completedModules[moduleId]) { // Only mark as completed if not already
+                completedModules[moduleId] = true;
+            }
+
+            const completedCount = Object.keys(completedModules).length;
+            const percentage = (completedCount / totalModules) * 100;
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${Math.round(percentage)}% Selesai`;
+
+            if (completedCount === totalModules) {
+                showMessage('Selamat, ' + currentUserNickname + ' yang cantik! Kamu sudah menyelesaikan SEMUA modul yang tersedia. Luar biasa! Sekarang kamu sudah siap untuk menghadapi tantangan. Terima kasih banyak atas kerja kerasmu!', 'sapi');
+            } else {
+                showMessage(getRandomCowMessage(), 'sapi'); // Give a random encouraging message
+            }
+        }
+
+        // --- Initial Load ---
+        window.onload = function() {
+            // Hide loading screen
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+            }, 500); // Wait for transition to complete
+
+            // Show intro message screen first
+            showPage('intro');
+
+            // Set a timeout or click event to transition from intro to auth page
+            introMessageScreen.addEventListener('click', () => {
+                introMessageScreen.style.opacity = '0';
+                setTimeout(() => {
+                    introMessageScreen.classList.add('hidden');
+                    showPage('auth');
+                    displayModule('home'); // Display home section after auth
+                }, 700); // Match opacity transition duration
+            });
+            // Optional: Auto-transition after a few seconds if no click
+            setTimeout(() => {
+                if (introMessageScreen.classList.contains('opacity-100')) {
+                    introMessageScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        introMessageScreen.classList.add('hidden');
+                        showPage('auth');
+                        displayModule('home'); // Display home section after auth
+                    }, 700);
+                }
+            }, 5000); // Show for 5 seconds then auto-transition
+        };
+    </script>
+</body>
+</html>
